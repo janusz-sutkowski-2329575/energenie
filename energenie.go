@@ -27,6 +27,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/asig/energenie/pkg/energenie"
 )
@@ -69,6 +70,7 @@ commands:
   status [<socket-spec>]: Print the sockets' status.
   on <socket-spec>:       Turn sockets on that match <socket-spec>.
   off <socket-spec>:      Turn sockets off that match <socket-spec>.
+  rst <socket-spec>:      Power cycle for the socket <socket-spec>.
 
   <socket-spec> can be a comma-separated list of socket numbers (1 - 4),
   ranges, or 'all' as a short cut for 1-4.
@@ -208,6 +210,20 @@ func main() {
 			usage()
 		}
 		switchSockets(args[0] == "on", args[1])
+		fmt.Printf("Operation finished\n")
+		fmt.Printf("Closing connection ...\n")
+		time.Sleep(3 * time.Second)
+	case "rst":
+		if len(args) != 2 {
+			usage()
+		}
+		fmt.Printf("Start power cycle for socket %s, wait 5s ... \n", args[1])
+		switchSockets(false, args[1])
+		time.Sleep(5 * time.Second)
+		switchSockets(true, args[1])
+		fmt.Printf("Power cycle for socket %s finished \n", args[1])
+		fmt.Printf("Closing connection ...\n")
+		time.Sleep(3 * time.Second)
 	default:
 		fmt.Fprintf(os.Stderr, "%s is not a valid command.\n", args[0])
 		usage()
